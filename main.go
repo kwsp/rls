@@ -23,13 +23,26 @@ func toScan(name string) bool {
 }
 
 func tree(name string, prefix []string) error {
-	node, err := os.Stat(name)
+	node, err := os.Lstat(name)
 	if err != nil {
 		return err
 	}
 
-	// Print current name and prefix
-	fmt.Println(strings.Join(prefix, "") + node.Name())
+	// Check if file is a symlink
+	// Print name
+	var sym_name string
+	if node.Mode()&os.ModeSymlink != 0 {
+		// Get symlink path
+		sym_name, err = os.Readlink(name)
+		if err != nil {
+			return err
+		}
+		// Print current name and prefix
+		fmt.Println(strings.Join(prefix, "") + node.Name() + " -> " + sym_name)
+	} else {
+		// Print current name and prefix
+		fmt.Println(strings.Join(prefix, "") + node.Name())
+	}
 
 	// if node is a file, increment f_counter and return
 	if !node.IsDir() {
@@ -73,7 +86,7 @@ func tree(name string, prefix []string) error {
 		}
 
 		// Recursively call tree on each valid entry
-		err = tree(path.Join(name, dir_file.Name()), prefix)
+		err = tree(path.Join(name, dir_file.Name()), append([]string(nil), prefix...))
 		if err != nil {
 			return err
 		}
