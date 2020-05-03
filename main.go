@@ -79,14 +79,19 @@ func tree(name string, prefix string) error {
 		return err
 	}
 
+	// Purge dotfiles and directorys from the list in place
+	n := 0
+	for _, dir_file := range dir_files {
+		if toScan(dir_file.Name()) {
+			dir_files[n] = dir_file
+			n++
+		}
+	}
+	dir_files = dir_files[:n]
+
 	// Traverse the files in the directory
 	n_files := len(dir_files) - 1
 	for i, dir_file := range dir_files {
-
-		// Skip dotfiles and directories
-		if !toScan(dir_file.Name()) {
-			continue
-		}
 
 		// Change prefix for last entry
 		if i == n_files {
