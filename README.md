@@ -4,6 +4,5 @@ Gotree emulates the classic "tree" program and recursively traverses a directory
 
 # Todo
 
-- Directory symlinks are currently counters as files, not directories
 - Terminal colour rendering
 

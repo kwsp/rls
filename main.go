@@ -5,12 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
 var f_count int = 0
 var d_count int = -1
-var FOLLOW_SYMLINK bool = false
 
 var SPCE string = "    "
 var VBAR string = "│   "
@@ -26,6 +26,7 @@ func toScan(name string) bool {
 
 func tree(name string, prefix string) error {
 	node, err := os.Lstat(name)
+
 	if err != nil {
 		return err
 	}
@@ -39,15 +40,29 @@ func tree(name string, prefix string) error {
 		if err != nil {
 			return err
 		}
-		if FOLLOW_SYMLINK {
-			// Follow
-			// Print current name and prefix
-			fmt.Println(prefix + node.Name() + " -> " + sym_name)
-		} else {
-			// Print current name and prefix
-			fmt.Println(prefix + node.Name() + " -> " + sym_name)
+
+		// Print current name and prefix + symlink target
+		fmt.Println(prefix + node.Name() + " -> " + sym_name)
+
+		if sym_name[0] != '/' {
+			print("Here\n")
+			sym_name = path.Join(filepath.Dir(name), sym_name)
 		}
+
+		node, err = os.Lstat(sym_name)
+		if err != nil && os.IsNotExist(err) {
+			f_count++
+		} else {
+			if node.IsDir() {
+				d_count++
+			} else {
+				f_count++
+			}
+		}
+		return nil
+
 	} else {
+		// Not symlink
 		// Print current name and prefix
 		fmt.Println(prefix + node.Name())
 	}
@@ -57,7 +72,6 @@ func tree(name string, prefix string) error {
 		f_count++
 		return nil
 	}
-
 	// node is a directory
 	d_count++
 
