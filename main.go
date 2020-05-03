@@ -17,6 +17,9 @@ var VBAR string = "│   "
 var TBAR string = "├── "
 var LBAR string = "└── "
 
+/*
+Check if the entry name is valid
+*/
 func toScan(name string) bool {
 	if name[0] == '.' {
 		return false
@@ -45,7 +48,6 @@ func tree(name string, prefix string) error {
 		fmt.Println(prefix + node.Name() + " -> " + sym_name)
 
 		if sym_name[0] != '/' {
-			print("Here\n")
 			sym_name = path.Join(filepath.Dir(name), sym_name)
 		}
 
@@ -61,17 +63,18 @@ func tree(name string, prefix string) error {
 		}
 		return nil
 
-	} else {
-		// Not symlink
-		// Print current name and prefix
-		fmt.Println(prefix + node.Name())
 	}
+
+	// Not symlink
+	// Print current name and prefix
+	fmt.Println(prefix + node.Name())
 
 	// if node is a file, increment f_counter and return
 	if !node.IsDir() {
 		f_count++
 		return nil
 	}
+
 	// node is a directory
 	d_count++
 
@@ -89,7 +92,6 @@ func tree(name string, prefix string) error {
 	// Read list of directory entries
 	dir_files, err := ioutil.ReadDir(name)
 	if err != nil {
-		println("Oops\n")
 		return err
 	}
 
@@ -136,5 +138,5 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("\n%d directories, %d files.\n", d_count, f_count)
+	fmt.Printf("\n%d directories, %d files\n", d_count, f_count)
 }
