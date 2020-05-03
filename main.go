@@ -10,6 +10,7 @@ import (
 
 var f_count int = 0
 var d_count int = -1
+var FOLLOW_SYMLINK bool = false
 
 var SPCE string = "    "
 var VBAR string = "│   "
@@ -38,8 +39,14 @@ func tree(name string, prefix string) error {
 		if err != nil {
 			return err
 		}
-		// Print current name and prefix
-		fmt.Println(prefix + node.Name() + " -> " + sym_name)
+		if FOLLOW_SYMLINK {
+			// Follow
+			// Print current name and prefix
+			fmt.Println(prefix + node.Name() + " -> " + sym_name)
+		} else {
+			// Print current name and prefix
+			fmt.Println(prefix + node.Name() + " -> " + sym_name)
+		}
 	} else {
 		// Print current name and prefix
 		fmt.Println(prefix + node.Name())
