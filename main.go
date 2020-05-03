@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -22,7 +23,7 @@ func toScan(name string) bool {
 	return true
 }
 
-func tree(name string, prefix []string) error {
+func tree(name string, prefix string) error {
 	node, err := os.Lstat(name)
 	if err != nil {
 		return err
@@ -38,10 +39,10 @@ func tree(name string, prefix []string) error {
 			return err
 		}
 		// Print current name and prefix
-		fmt.Println(strings.Join(prefix, "") + node.Name() + " -> " + sym_name)
+		fmt.Println(prefix + node.Name() + " -> " + sym_name)
 	} else {
 		// Print current name and prefix
-		fmt.Println(strings.Join(prefix, "") + node.Name())
+		fmt.Println(prefix + node.Name())
 	}
 
 	// if node is a file, increment f_counter and return
@@ -55,19 +56,19 @@ func tree(name string, prefix []string) error {
 
 	// Adjust the prefix for subdirectories
 	if len(prefix) == 0 {
-		prefix = []string{TBAR}
+		prefix = TBAR
 	} else {
-		prefix[len(prefix)-1] = VBAR
-		prefix = append(prefix, TBAR)
+		if strings.HasSuffix(prefix, LBAR) {
+			prefix = prefix[:len(prefix)-10] + SPCE + TBAR
+		} else {
+			prefix = prefix[:len(prefix)-10] + VBAR + TBAR
+		}
 	}
 
-	// Read its files
-	dir, err := os.Open(name)
+	// Read list of directory entries
+	dir_files, err := ioutil.ReadDir(name)
 	if err != nil {
-		return err
-	}
-	dir_files, err := dir.Readdir(-1)
-	if err != nil {
+		println("Oops\n")
 		return err
 	}
 
@@ -82,11 +83,11 @@ func tree(name string, prefix []string) error {
 
 		// Change prefix for last entry
 		if i == n_files {
-			prefix = append(prefix[:len(prefix)-1], LBAR)
+			prefix = prefix[:len(prefix)-10] + LBAR
 		}
 
 		// Recursively call tree on each valid entry
-		err = tree(path.Join(name, dir_file.Name()), append([]string(nil), prefix...))
+		err = tree(path.Join(name, dir_file.Name()), prefix)
 		if err != nil {
 			return err
 		}
@@ -96,7 +97,6 @@ func tree(name string, prefix []string) error {
 
 func main() {
 	var dir string
-	var prefix = []string{}
 
 	if len(os.Args) == 1 {
 		dir = "."
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	// Traverse
-	err := tree(dir, prefix)
+	err := tree(dir, "")
 	if err != nil {
 		fmt.Println(err)
 	}
